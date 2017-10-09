@@ -3,7 +3,7 @@ from threading import Thread, Lock
 
 
 send_lock = Lock()
-
+increase_lock = Lock()
 class Receiver:
     def __init__(self, ip, port):
         self.ip = ip
@@ -16,13 +16,28 @@ class Receiver:
     
     def handle(self, con):
         while True:
-            msg = con.recv(256)
+            try:
+                msg = con.recv(256)
+            except socket.error as e:
+                print e
+                break   
+            try:
+                _, primitive = msg.split("#", 1)
+            except ValueError:
+                break
+            if primitive != "add":
+                print msg
             self.send_everyone(msg)
-                
+             
     def send_everyone(self, msg):
         send_lock.acquire()
         for con in self.cons:
-            con.send(msg)
+            try:
+                con.send(msg)
+            except socket.error as e:
+                print e
+                self.cons.remove(con)
+
         
         send_lock.release()
             

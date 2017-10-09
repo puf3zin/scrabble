@@ -14,10 +14,11 @@ class Client:
             except socket.error:
                 self.seq_port += 1
                 print self.seq_port
-        self.send_msg("msg#" + name + " has joined the game")
+        self.send_msg("#msg#" + name + " has joined the game", 0, name)
 
-    def send_msg(self, msg):
-        self.con_to_seq.send(msg)
+    def send_msg(self, msg, msg_id, name):
+        final_msg = name + "++" + str(msg_id) + "#" + msg
+        self.con_to_seq.send(final_msg)
 
     def recv_msg(self):
         result = self.con_to_seq.recv(256)
